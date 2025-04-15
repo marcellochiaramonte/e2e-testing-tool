@@ -1,28 +1,22 @@
 import { test } from "@playwright/test";
-import { config } from "../../config";
-import { LoginPage } from "../../objects/fluent-login";
+import { configuration } from "config/config";
+import { LoginPage } from "pages/login";
 
 const DPFH = "[DPFH.0043]";
 
 // - Lock/Unlock Test Plans, Test Cases and Schedulings";
 
 test(`${DPFH} - Lock/Unlock Test Plan - Locked by user`, async ({ page }) => {
-  const loginPage = new LoginPage(page);
+  const app = new LoginPage(page, []);
 
-  await loginPage
-    .goto()
-    .enterUsername(config.credentials.username)
-    .enterPassword(config.credentials.password)
-    .submit()
-    .assertLoggedIn()
-
-    .navigateTo()
+  await app
+    .login(configuration.getCredentials())
+    .navigateToTestPlansPage()
     .createTestPlan(
       `Auto Generated Test Plan #${Math.floor(Math.random() * 100000)}`
     )
-
     .assertIsLocked()
-    .assertIsLockedByUser(config.credentials.username)
+    .assertIsLockedByUser(configuration.getCredentials().username)
     .unlock()
     .assertIsUnlocked()
     .lock()

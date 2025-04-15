@@ -1,31 +1,31 @@
 import { expect, Page } from "@playwright/test";
-import { config } from "../config";
+import { Step } from "common/types";
 
-export type Step = () => Promise<void>;
-
-export class TestPlanFluent {
-  constructor(private page: Page, private steps: Step[]) {
+export class TestPlan {
+  constructor(private page: Page, private steps: Array<Step>) {
     this.steps = steps;
-  }
-
-  goto(): this {
-    this.steps.push(async () => {
-      await this.page.goto(config.baseUrl + "/apps/ait-mgmt/testPlans");
-    });
-    return this;
   }
 
   /**
    * Actions
    */
-  lock() {
+
+  navigateTo() {
+    this.steps.push(async () => {
+      await this.page.getByText("AIT Management").click();
+      await this.page.getByText("Test Plans").click();
+    });
+    return this;
+  }
+
+  lock(): TestPlan {
     this.steps.push(async () => {
       await this.page.getByTestId("lock-button").click();
     });
     return this;
   }
 
-  unlock() {
+  unlock(): TestPlan {
     this.steps.push(async () => {
       await this.page.getByTestId("unlock-button").click();
     });
@@ -35,7 +35,7 @@ export class TestPlanFluent {
   /**
    * Assertions
    */
-  assertIsUnlocked() {
+  assertIsUnlocked(): TestPlan {
     this.steps.push(async () => {
       await expect(this.page.getByTestId("unlocked-icon")).toBeVisible();
       await expect(this.page.getByTestId("locked-icon")).not.toBeVisible();
@@ -46,7 +46,7 @@ export class TestPlanFluent {
     return this;
   }
 
-  assertIsLocked() {
+  assertIsLocked(): TestPlan {
     this.steps.push(async () => {
       await expect(this.page.getByTestId("locked-icon")).toBeVisible();
       await expect(this.page.getByTestId("unlocked-icon")).not.toBeVisible();
@@ -54,7 +54,7 @@ export class TestPlanFluent {
     return this;
   }
 
-  assertIsLockedByUser(username: string) {
+  assertIsLockedByUser(username: string): TestPlan {
     this.steps.push(async () => {
       await expect(this.page.getByTestId("test-plan-locked-by")).toContainText(
         username
@@ -63,26 +63,9 @@ export class TestPlanFluent {
     return this;
   }
 
-  navigateTo() {
-    this.steps.push(async () => {
-      await this.page.getByText("AIT Management").click();
-      await this.page.getByText("Test Plans").click();
-    });
-    return this;
-  }
-
-  wait(ms: number): this {
+  wait(ms: number): TestPlan {
     this.steps.push(async () => {
       await new Promise((resolve) => setTimeout(resolve, ms));
-    });
-    return this;
-  }
-
-  createTestPlan(title: string) {
-    this.steps.push(async () => {
-      await this.page.getByTestId("add-test-plan-button").click();
-      await this.page.getByTestId("create-test-plan-text-input").fill(title);
-      await this.page.getByTestId("create-test-plan-create-button").click();
     });
     return this;
   }

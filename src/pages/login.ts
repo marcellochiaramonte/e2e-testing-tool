@@ -1,17 +1,15 @@
-import { expect, Page } from "@playwright/test";
-import { config } from "../config";
-import { TestPlanFluent } from "./test-plan2";
+import { Page } from "@playwright/test";
 
-type Step = () => Promise<void>;
+import { Step } from "common/types";
+import { configuration, Credentials } from "config/config";
+import { DashboardPage } from "./dashboard";
 
 export class LoginPage {
-  private steps: Step[] = [];
+  constructor(private page: Page, private steps: Array<Step>) {}
 
-  constructor(private page: Page) {}
-
-  goto(): this {
+  navigateTo(): this {
     this.steps.push(async () => {
-      await this.page.goto(config.baseUrl);
+      await this.page.goto(configuration.getBaseUrl());
     });
     return this;
   }
@@ -30,19 +28,19 @@ export class LoginPage {
     return this;
   }
 
-  submit(): this {
+  submit(): DashboardPage {
     this.steps.push(async () => {
       await this.page.getByRole("button").click();
     });
-    return this;
+    return new DashboardPage(this.page, this.steps);
   }
 
-  assertLoggedIn(): TestPlanFluent {
-    this.steps.push(async () => {
-      await expect(this.page).toHaveURL(`${config.baseUrl}/pages/dashboard`);
-      await expect(this.page).toHaveTitle("Hamilton Medical Portal");
-    });
-    return new TestPlanFluent(this.page, this.steps);
+  login(credentials: Credentials): DashboardPage {
+    return this.navigateTo()
+      .enterUsername(credentials.username)
+      .enterPassword(credentials.password)
+      .submit()
+      .assertUserIsLoggedIn();
   }
 
   async run(): Promise<void> {

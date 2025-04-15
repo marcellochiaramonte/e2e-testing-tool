@@ -13,6 +13,6 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "test": "playwright test --ui"
+    "test": "tsc && playwright test --ui"
   }
 }

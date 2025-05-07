@@ -4,8 +4,6 @@ import { LoginPage } from "pages/login";
 
 const DPFH = "[DPFH.0043]";
 
-// - Lock/Unlock Test Plans, Test Cases and Schedulings";
-
 test(`${DPFH} - Lock/Unlock Test Plan - Locked by user`, async ({ page }) => {
   const app = new LoginPage(page, []);
 

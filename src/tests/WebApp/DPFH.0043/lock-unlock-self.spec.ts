@@ -1,25 +1,26 @@
 import { test } from "@playwright/test";
-import { configuration } from "config/config";
-import { LoginPage } from "pages/login";
+import { Configuration } from "config/config";
+import { App } from "pages/app";
 
 const DPFH = "[DPFH.0043]";
 
-test(`${DPFH} - Lock/Unlock Test Plan - Locked by user`, async ({ page }) => {
-  const app = new LoginPage(page, []);
+test(`${DPFH} - Lock/Unlock Test Plan - Locked by user`, async () => {
+  const config = Configuration.getConfiguration();
+  const loginPage = await App.start();
 
-  await app
-    .login(configuration.getCredentials())
+  await loginPage
+    .login()
     .navigateToTestPlansPage()
     .createTestPlan(
       `Auto Generated Test Plan #${Math.floor(Math.random() * 100000)}`
     )
     .assertIsLocked()
-    .assertIsLockedByUser(configuration.getCredentials().username)
+    .assertIsLockedByUser(config.getUsername())
     .unlock()
     .assertIsUnlocked()
     .lock()
     .assertIsLocked()
-    .run(); // Only awaited once here
+    .runSteps(); // Only awaited once here
 });
 
 // test(dpfhCase + " - Test Plans", async ({ page }) => {

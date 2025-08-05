@@ -1,13 +1,11 @@
 import { test } from "@playwright/test";
-import { configuration } from "config/config";
 import { App } from "pages/app";
 import { DPFH } from "../DPFH";
 
-test(`${DPFH["0008"]} - Check functionality of filters`, async ({ page }) => {
-  await App.getInstance(page)
-    .login(configuration.getCredentials())
-    .navigateToTestPlansPage()
-    .run(); // Only awaited once here
+test(`${DPFH["0008"]} - Check functionality of filters`, async () => {
+  const loginPage = await App.start();
+
+  await loginPage.login().navigateToTestPlansPage().runSteps();
 });
 
 // test(dpfhCase + " - Test Plans", async ({ page }) => {

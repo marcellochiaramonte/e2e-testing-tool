@@ -1,9 +1,13 @@
 import { expect, Page } from "@playwright/test";
+import { BasePage } from "common/base-page";
 import { Step } from "common/types";
-import { TestPlans } from "./test-plans";
+import { TestPlanRunOverview } from "./ait-management/test-plan-run-overview";
+import { TestPlans } from "./ait-management/test-plans";
 
-export class DashboardPage {
-  constructor(private page: Page, private steps: Array<Step>) {}
+export class DashboardPage extends BasePage {
+  constructor(page: Page, steps: Array<Step>) {
+    super(page, steps);
+  }
 
   assertUserIsLoggedIn(): DashboardPage {
     this.steps.push(async () => {
@@ -23,10 +27,11 @@ export class DashboardPage {
     return new TestPlans(this.page, this.steps);
   }
 
-  async run(): Promise<void> {
-    for (const step of this.steps) {
-      await step();
-    }
-    this.steps = []; // reset after run
+  navigateToTestPlanRunPage(): TestPlanRunOverview {
+    this.steps.push(async () => {
+      await this.page.getByText("AIT Management").click();
+      await this.page.getByText("Test Plan Run").click();
+    });
+    return new TestPlanRunOverview(this.page, this.steps);
   }
 }

@@ -1,27 +1,29 @@
 import dotenv from "dotenv";
 import path from "path";
-
-export interface Credentials {
-  username: string;
-  password: string;
-}
-
-export enum Environment {
-  PROD = "PROD",
-  VNV = "VNV",
-  TEST = "TEST",
-  LOCAL = "LOCAL",
-}
+import { credentials, Credentials } from "./credentials";
+import { Environment } from "./environment";
 
 export class Configuration {
   constructor(
     private credentials: Credentials,
     private environment: Environment,
     private baseUrl: string
-  ) {}
+  ) {
+    if (!this.credentials.username || !this.credentials.password) {
+      throw new Error("Missing required configuration: Username or Password");
+    }
+  }
 
   getCredentials(): Credentials {
     return this.credentials;
+  }
+
+  getUsername(): string {
+    return this.credentials.username;
+  }
+
+  getPassword(): string {
+    return this.credentials.password;
   }
 
   setCredentials(credentials: Credentials): void {
@@ -35,65 +37,42 @@ export class Configuration {
   getBaseUrl(): string {
     return this.baseUrl;
   }
-}
 
-// Load .env file
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+  static getConfiguration(): Configuration {
+    return new Configuration(
+      credentials.admin,
+      Environment.LOCAL,
+      "http://localhost:4200"
+    );
+  }
 
-const credentials = {
-  developer: {
-    username: "automate-it_developer",
-    password: "automate-it_developer123.",
-  },
-  admin: {
-    username: "automate-it_admin",
-    password: "automate-it_admin456.",
-  },
-};
+  loadConfiguration() {
+    // currently not used
+    // Load .env file
+    dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-const appConfig: {
-  credentials: Credentials;
-  environment: Environment;
-  baseUrl: string;
-} = {
-  credentials: credentials.admin,
-  environment: Environment.LOCAL,
-  baseUrl: "http://localhost:4200",
-};
+    const env = process.env.ENVIRONMENT;
 
-function setConfig() {
-  const env = process.env.ENVIRONMENT;
+    console.log("Environment:", env);
 
-  if (env) {
-    switch (env) {
-      // case Environment.PROD:
-      //   config.environment = Environment.PROD;
-      //   break;
-      // case Environment.VNV:
-      //   config.environment = Environment.VNV;
-      //   break;
-      case Environment.TEST:
-        appConfig.environment = Environment.TEST;
-        appConfig.baseUrl = "https://medical-portal-test.hamilton.ch";
-        break;
-      default:
-        appConfig.environment = Environment.LOCAL;
-        appConfig.baseUrl = "http://localhost:4200";
-        break;
+    if (env) {
+      switch (env) {
+        // case Environment.PROD:
+        //   config.environment = Environment.PROD;
+        //   break;
+        // case Environment.VNV:
+        //   config.environment = Environment.VNV;
+        //   break;
+        case Environment.TEST:
+          this.environment = Environment.TEST;
+          this.baseUrl = "https://medical-portal-test.hamilton.ch";
+          break;
+        default:
+          this.environment = Environment.LOCAL;
+          this.baseUrl = "http://localhost:4200";
+          break;
+      }
     }
+    return this;
   }
 }
-
-if (!appConfig.credentials.username || !appConfig.credentials.password) {
-  throw new Error("Missing required configuration: Username or Password");
-}
-
-setConfig();
-
-export const configuration = new Configuration(
-  credentials.admin,
-  Environment.LOCAL,
-  appConfig.baseUrl
-);
-
-console.log(configuration);

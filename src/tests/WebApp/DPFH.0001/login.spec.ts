@@ -1,14 +1,7 @@
 import { test } from "@playwright/test";
-import { configuration } from "config/config";
-import { LoginPage } from "pages/login";
+import { App } from "pages/app";
 
-test("fluent login works", async ({ page }) => {
-  const loginPage = new LoginPage(page, []);
-
-  await loginPage
-    .navigateTo()
-    .enterUsername(configuration.getCredentials().username)
-    .enterPassword(configuration.getCredentials().password)
-    .submit()
-    .run(); // Only awaited once here
+test("fluent login works", async () => {
+  const loginPage = await App.start();
+  await loginPage.navigateTo().login().runSteps();
 });

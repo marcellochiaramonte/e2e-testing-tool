@@ -1,15 +1,22 @@
 import { Page } from "@playwright/test";
 
+import { BasePage } from "common/base-page";
 import { Step } from "common/types";
-import { configuration, Credentials } from "config/config";
+import { Configuration } from "config/config";
+import { Credentials } from "config/credentials";
 import { DashboardPage } from "./dashboard";
 
-export class LoginPage {
-  constructor(private page: Page, private steps: Array<Step>) {}
+export class LoginPage extends BasePage {
+  private config: Configuration;
+
+  constructor(page: Page, steps: Array<Step>) {
+    super(page, steps);
+    this.config = Configuration.getConfiguration();
+  }
 
   navigateTo(): this {
     this.steps.push(async () => {
-      await this.page.goto(configuration.getBaseUrl());
+      await this.page.goto(this.config.getBaseUrl());
     });
     return this;
   }
@@ -35,18 +42,11 @@ export class LoginPage {
     return new DashboardPage(this.page, this.steps);
   }
 
-  login(credentials: Credentials): DashboardPage {
+  login(credentials?: Credentials): DashboardPage {
     return this.navigateTo()
-      .enterUsername(credentials.username)
-      .enterPassword(credentials.password)
+      .enterUsername(credentials?.username ?? this.config.getUsername())
+      .enterPassword(credentials?.password ?? this.config.getPassword())
       .submit()
       .assertUserIsLoggedIn();
-  }
-
-  async run(): Promise<void> {
-    for (const step of this.steps) {
-      await step();
-    }
-    this.steps = []; // reset after run
   }
 }

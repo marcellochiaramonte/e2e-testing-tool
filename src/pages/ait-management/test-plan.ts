@@ -1,9 +1,10 @@
 import { expect, Page } from "@playwright/test";
+import { BasePage } from "common/base-page";
 import { Step } from "common/types";
 
-export class TestPlan {
-  constructor(private page: Page, private steps: Array<Step>) {
-    this.steps = steps;
+export class TestPlan extends BasePage {
+  constructor(page: Page, steps: Array<Step>) {
+    super(page, steps);
   }
 
   /**
@@ -63,17 +64,10 @@ export class TestPlan {
     return this;
   }
 
-  wait(ms: number): TestPlan {
+  waitMs(ms: number): TestPlan {
     this.steps.push(async () => {
       await new Promise((resolve) => setTimeout(resolve, ms));
     });
     return this;
-  }
-
-  async run(): Promise<void> {
-    for (const step of this.steps) {
-      await step();
-    }
-    this.steps = []; // reset after run
   }
 }

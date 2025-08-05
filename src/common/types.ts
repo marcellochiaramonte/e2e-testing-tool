@@ -1,1 +1,1 @@
-export type Step = () => Promise<void>;
+export type Step = any;
